@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <script type="text/javascript" src="./node_modules/three/three.min.js"></script>
+        <script type="text/javascript" src="./node_modules/dat.gui/build/dat.gui.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+
+            var	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000),
+                scene = new THREE.Scene(),
+                renderer = new THREE.WebGLRenderer();
+
+            renderer.setClearColor(0x000000, 1.0);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            var cubeGeometry = new THREE.BoxGeometry(6, 6, 6);
+            var cubeMaterial = new THREE.MeshLambertMaterial();
+            cubeMaterial.color = new THREE.Color('red');
+            var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+            cube.name = 'cube';
+            scene.add(cube);
+
+            var light = new THREE.DirectionalLight();
+            light.position.set(20, 30, 20);
+            scene.add(light);
+
+            camera.position.x = 15;
+            camera.position.y = 16;
+            camera.position.z = 13;
+            camera.lookAt(scene.position);
+
+            document.body.appendChild(renderer.domElement);
+
+            control = new function () {
+                this.rotationSpeedX = 0.001;
+                this.rotationSpeedY = 0.001;
+                this.rotationSpeedZ = 0.001;
+            };
+
+            addController(control);
+
+            render();
+
+            function addController(){
+                var gui = new dat.GUI();
+                gui.add(control, 'rotationSpeedX', -0.2, 0.2);
+                gui.add(control, 'rotationSpeedY', -0.2, 0.2);
+                gui.add(control, 'rotationSpeedZ', -0.2, 0.2);
+            }
+
+            function render(){
+                renderer.render(scene, camera);
+                scene.getObjectByName('cube').rotation.x += control.rotationSpeedX;
+                scene.getObjectByName('cube').rotation.y += control.rotationSpeedY;
+                scene.getObjectByName('cube').rotation.z += control.rotationSpeedZ;
+
+
+                requestAnimationFrame(render);
+            }
+
+        </script>
+    </body>
+</html>

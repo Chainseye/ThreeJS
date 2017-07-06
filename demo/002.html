@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1">
+        <title>ThreeJS</title>
+
+        <link rel="stylesheet" type="text/css" href="../skin/css/base.css" />
+    </head>
+    <body>
+        <div class="container"></div>
+        <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript" src="../js/three.min.js"></script>
+        <script>
+            /**
+            *   最基础的4个步骤：
+            *       1. 初始化WebGL绘图上下文 
+            *       2. 初始化着色器程序
+            *       3. 建立模型和数据缓存
+            *       4. 完成绘制和动画
+            **/
+            
+            // scene  
+            var scene = new THREE.Scene();      
+            // camera  
+            var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);  
+            // renderer  
+            var renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });  
+            renderer.setSize(window.innerWidth, window.innerHeight);  
+            document.body.appendChild(renderer.domElement);  
+        
+            // sphere  
+            // the first argument of THREE.SphereGeometry is the radius, the second argument is  
+            // the segmentsWidth, and the third argument is the segmentsHeight.  Increasing the   
+            // segmentsWidth and segmentsHeight will yield a more perfect circle, but will degrade  
+            // rendering performance  
+            // var sphere = new THREE.Mesh(new THREE.SphereGeometry(150, 100, 100), new THREE.MeshNormalMaterial());  
+            // sphere.overdraw = true;  
+            
+            var sphere = new THREE.SphereGeometry(100, 100, 100);
+            var material = new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
+            var cube = new THREE.Mesh(sphere, material);
+            cube.castShadow = cube.receiveShadow = true;
+
+            scene.add(cube);  
+
+
+　　　　　　 //设置光源
+            var light = new THREE.DirectionalLight(0xff0000, 1.0, 0);//设置平行光源
+            light.position.set( 200, 200, 200 );//设置光源向量
+            scene.add(light);// 追加光源到场景
+            
+            camera.position.z = 50;  
+        
+            var render = function () {
+                renderer.render(scene, camera);
+
+                requestAnimationFrame( render );
+
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.03;
+
+            };
+
+        </script>
+    </body>
+</html>
