@@ -36,7 +36,21 @@
             document.body.appendChild( renderer.domElement );
 
             var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-            var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+            
+            //          对光照无感，给集合体一种简单的颜色或显示线框
+            //                           ||
+            //                           Ｖ
+            var material = new THREE.MeshBasicMaterial({ 
+                color: 0x00ff00,
+                wireframe: true,
+                // visible：是否可见，默认为true
+　　            // side：渲染面片正面或是反面，默认为正面THREE.FrontSide，可设置为反面THREE.BackSide，或双面THREE.DoubleSide
+　　            // wireframe：是否渲染线而非面，默认为false
+　　            // map：使用纹理贴图
+                // opacity: 透明度
+                // ambient：表示对环境光的反射能力，只有当设置了AmbientLight后，该值才是有效的，材质对环境光的反射能力与环境光强相乘后得到材质实际表现的颜色
+                // emissive：是材质的自发光颜色，可以用来表现光源的颜色，并不是一种光源，而是一种不受光照影响的颜色
+            });
             var cube = new THREE.Mesh( geometry, material );
             scene.add( cube );
 

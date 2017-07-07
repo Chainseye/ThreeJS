@@ -1,66 +1,107 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title></title>
-        <script type="text/javascript" src="./node_modules/three/three.min.js"></script>
-        <script type="text/javascript" src="./node_modules/dat.gui/build/dat.gui.min.js"></script>
+    <head>        
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1">
+        <title>地球</title>
+
+        <link rel="stylesheet" type="text/css" href="../skin/css/base.css" />
     </head>
     <body>
+        <div id="container"></div>
+        <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript" src="../js/three.min.js"></script>
         <script type="text/javascript">
+            $(document).ready(function() {
+                var scene,
+                    camera,
+                    light,
+                    renderer,
+                    earthObject; 
+                var WIDTH = window.innerWidth,
+                    HEIGHT = window.innerHeight;
+                var angle = 75,
+                    aspect = WIDTH / HEIGHT,
+                    near = 0.1,
+                    far = 3000;
+                var container = document.getElementById('container');
+                
+                $(window).resize(function() {
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
 
-            var	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000),
-                scene = new THREE.Scene(),
-                renderer = new THREE.WebGLRenderer();
+                //场景
+                renderer = new THREE.WebGLRenderer({
+                    antialiasing : true //抗锯齿
+                });
+                renderer.setSize(WIDTH, HEIGHT);
+                renderer.domElement.style.position = 'relative';
+                container.appendChild(renderer.domElement);
+                renderer.autoClear = false;
+                //打开渲染器的地图阴影
+                renderer.shadowMapEnabled = false;
 
-            renderer.setClearColor(0x000000, 1.0);
-            renderer.setSize(window.innerWidth, window.innerHeight);
+                //摄像仪
+                camera = new THREE.PerspectiveCamera(angle, aspect, near, far);
 
-            var cubeGeometry = new THREE.BoxGeometry(6, 6, 6);
-            var cubeMaterial = new THREE.MeshLambertMaterial();
-            cubeMaterial.color = new THREE.Color('red');
-            var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                camera.position.set(0, 0, 0);
+                scene = new THREE.Scene();
+                
+                // 设置聚光灯光源
+                // light = new THREE.SpotLight(0xffffff, 1, 0, Math.PI / 2, 1);
+                // light.position.set(4000, 4000, 1500);
+                // light.target.position.set(1000, 3800, 1000);
+                // scene.add(light);
+                
+                // 设置平行光源
+                var directionalLight = new THREE.DirectionalLight(0xffffff, 1.0, 0);        
+                directionalLight.position.set( 0, 0, -10000 );                             
+                scene.add(directionalLight);
 
-            cube.name = 'cube';
-            scene.add(cube);
+                //地球
+                var earthGeo = new THREE.SphereGeometry (30, 40, 400);
+                //                   Phong(冯氏)材质类型 
+                //          对光照也有反应，用于创建金属类明亮的物体
+                //                           ||
+                //                           Ｖ
+                var earthMat = new THREE.MeshPhongMaterial({
+                    map: THREE.ImageUtils.loadTexture('../skin/image/g1.jpg'),
+                    bumpMap: THREE.ImageUtils.loadTexture('../skin/image/bump-map.jpg'),
+                    bumpScale: 10,
+                    opacity: 0.47
+                    // color: 0xff3220,
+                    // ambient：设置材质的环境色，和AmbientLight光源一起使用，这个颜色会与环境光的颜色相乘。即是对光源作出反应。
+    　　            // emissive：设置材质发射的颜色，不是一种光源，而是一种不受光照影响的颜色。默认为黑色
+    　　            // specular：指定该材质的光亮程度及其高光部分的颜色，如果设置成和color属性相同的颜色，则会得到另一个更加类似金属的材质，如果设置成grey灰色，则看起来像塑料
+    　　            // shininess：指定高光部分的亮度，默认值为30
+                }); 
+                var earthMesh = new THREE.Mesh(earthGeo, earthMat); 
+                earthMesh.position.set(-100, 0, 0); 
+                earthMesh.rotation.x = 0.2;
+                scene.add(earthMesh);
 
-            var light = new THREE.DirectionalLight();
-            light.position.set(20, 30, 20);
-            scene.add(light);
+                camera.lookAt(earthMesh.position);
+                
+                //STARS
+                var starGeo = new THREE.SphereGeometry (3000, 10, 100),
+                    starMat = new THREE.MeshBasicMaterial();
+                starMat.map = THREE.ImageUtils.loadTexture('../skin/image/star.png');
+                starMat.side = THREE.BackSide;            
+                var starMesh = new THREE.Mesh(starGeo, starMat);
+                            
+                scene.add(starMesh);
 
-            camera.position.x = 15;
-            camera.position.y = 16;
-            camera.position.z = 13;
-            camera.lookAt(scene.position);
+                var render = function () {
+                    requestAnimationFrame( render );
+                    //earthMesh.rotation.x += 0.01;
+                    earthMesh.rotation.y += 0.005;
 
-            document.body.appendChild(renderer.domElement);
+                    renderer.render(scene, camera);
+                };
 
-            control = new function () {
-                this.rotationSpeedX = 0.001;
-                this.rotationSpeedY = 0.001;
-                this.rotationSpeedZ = 0.001;
-            };
-
-            addController(control);
-
-            render();
-
-            function addController(){
-                var gui = new dat.GUI();
-                gui.add(control, 'rotationSpeedX', -0.2, 0.2);
-                gui.add(control, 'rotationSpeedY', -0.2, 0.2);
-                gui.add(control, 'rotationSpeedZ', -0.2, 0.2);
-            }
-
-            function render(){
-                renderer.render(scene, camera);
-                scene.getObjectByName('cube').rotation.x += control.rotationSpeedX;
-                scene.getObjectByName('cube').rotation.y += control.rotationSpeedY;
-                scene.getObjectByName('cube').rotation.z += control.rotationSpeedZ;
-
-
-                requestAnimationFrame(render);
-            }
-
+                render();
+            });
         </script>
     </body>
 </html>

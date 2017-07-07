@@ -24,13 +24,15 @@
             // scene  
             var scene = new THREE.Scene();      
             // camera  
-            var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);  
+            var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);  
             // renderer  
-            var renderer = new THREE.WebGLRenderer({
-                antialias: true
-            });  
+            var renderer = new THREE.WebGLRenderer();  
+
+            scene.add(camera); 
+            camera.position.z = 300;
             renderer.setSize(window.innerWidth, window.innerHeight);  
-            document.body.appendChild(renderer.domElement);  
+            
+            $(".container").append(renderer.domElement);  
         
             // sphere  
             // the first argument of THREE.SphereGeometry is the radius, the second argument is  
@@ -41,20 +43,28 @@
             // sphere.overdraw = true;  
             
             var sphere = new THREE.SphereGeometry(100, 100, 100);
-            var material = new THREE.MeshLambertMaterial( { color: 0x00ff00 } );
+
+            //          对光照有反应，用于创建暗淡的不发光的物体
+            //                           ||
+            //                           Ｖ
+            var material = new THREE.MeshLambertMaterial({ color: 0xffffff });
             var cube = new THREE.Mesh(sphere, material);
-            cube.castShadow = cube.receiveShadow = true;
+            cube.geometry.verticesNeedUpdate = true;
+            cube.geometry.normalsNeedUpdate = true;
 
             scene.add(cube);  
 
-
 　　　　　　 //设置光源
-            var light = new THREE.DirectionalLight(0xff0000, 1.0, 0);//设置平行光源
-            light.position.set( 200, 200, 200 );//设置光源向量
-            scene.add(light);// 追加光源到场景
-            
-            camera.position.z = 50;  
-        
+            var pointLight = new THREE.PointLight(0xff0000);                            //设置点光源
+            var directionalLight = new THREE.DirectionalLight(0x00ff00, 1.0, 0);        //设置平行光源
+            //设置光源向量
+            pointLight.position.set( -200, 0, 200 );
+            directionalLight.position.set( 500, 0, 500 );                             
+            //追加光源到场景
+            scene.add(pointLight);
+            scene.add(directionalLight);
+      
+            //渲染
             var render = function () {
                 renderer.render(scene, camera);
 
@@ -64,6 +74,8 @@
                 cube.rotation.y += 0.03;
 
             };
+
+            renderer.render(scene, camera);
 
         </script>
     </body>
