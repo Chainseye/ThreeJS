@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1">
-        <title>OBJ Render</title>
+        <title>OBJ Render U</title>
 
         <link rel="stylesheet" type="text/css" href="../skin/css/base.css" />
     </head>
@@ -12,11 +12,7 @@
         <div id="counter"></div>
         <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
         <script type="text/javascript" src="../js/three.min.js"></script>
-        <script type="text/javascript" src="../js/r78/DDSLoader.js"></script>
         <script type="text/javascript" src="../js/r78/OBJLoader.js"></script>
-        <script type="text/javascript" src="../js/r78/MTLLoader.js"></script>
-
-        <script type="text/javascript" src="../js/r78/Detector.js"></script>
         <script type="text/javascript" src="../js/r78/stats.min.js"></script>
         <script type="text/javascript">
             $(document).ready(function() {
@@ -34,9 +30,11 @@
 
                     container = document.createElement('div');
                     document.body.appendChild(container);
+                    stats = new Stats();
+			        container.appendChild( stats.dom );
 
-                    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
-                    camera.position.z = 3;
+                    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 200000);
+                    camera.position.z = 20000;
 
                     // scene
                     scene = new THREE.Scene();
@@ -48,26 +46,16 @@
                     directionalLight.position.set(0, 0, 1).normalize();
                     scene.add(directionalLight);
 
-                    // model
-                    var onProgress = function(xhr) {~
-                        if (xhr.lengthComputable) {
-                            var percentComplete = xhr.loaded / xhr.total * 100;
-                            var counter = document.getElementById("counter");
-                            counter.innerText = Math.round(percentComplete, 2) + '% downloaded';
-                        }
-                    };
+                    
+                    var obj = new THREE.OBJLoader();
+                    obj.load("obj/d.obj", function(o) {
+                        o.position.y = 0;
+                        o.rotation.x = -0.0;
+                        o.rotation.y = 0.0;
+                        o.rotation.z = 2.42;
+                        scene.add(o);
+                    })
 
-                    var onError = function(xhr) {};
-
-                    var loader = new THREE.OBJLoader();
-                    loader.load( "obj/d.obj", function ( group ) {
-                        geometry = group.children[ 0 ].geometry;
-                        geometry.attributes.uv2 = geometry.attributes.uv;
-                        geometry.center();
-                        mesh = new THREE.Mesh( geometry, materialNormal );
-                        mesh.scale.multiplyScalar( 25 );
-                        scene.add( mesh );
-                    } );
 
                     //
 
@@ -79,6 +67,7 @@
                     //
 
                     window.addEventListener('resize', onWindowResize, false);
+                    window.addEventListener('wheel', onWindowScroll, false);
 
                 }
 
@@ -94,6 +83,12 @@
 
                 }
 
+                function onWindowScroll(e) {
+                        if(e.wheelDelta){//IE/Opera/Chrome 
+                            camera.position.z += 2 * e.wheelDelta;
+                        }
+                }
+                
 
                 function animate() {
 
@@ -104,7 +99,8 @@
 
                 function render() {
 
-
+                    stats.update();
+                    
                     camera.lookAt(scene.position);
 
                     renderer.render(scene, camera);
