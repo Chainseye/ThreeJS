@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    <head>        
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1">
+        <title>OBJ Render</title>
+
+        <link rel="stylesheet" type="text/css" href="../skin/css/base.css" />
+    </head>
+    <body>
+        <div id="counter"></div>
+        <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript" src="../js/three.min.js"></script>
+        <script type="text/javascript" src="../js/r78/DDSLoader.js"></script>
+        <script type="text/javascript" src="../js/r78/OBJLoader.js"></script>
+        <script type="text/javascript" src="../js/r78/MTLLoader.js"></script>
+
+        <script type="text/javascript" src="../js/r78/Detector.js"></script>
+        <script type="text/javascript" src="../js/r78/stats.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                var container, stats;
+                var camera, scene, renderer;
+                var mouseX = 0,
+                    mouseY = 0;
+                var windowHalfX = window.innerWidth / 2;
+                var windowHalfY = window.innerHeight / 2;
+
+                init();
+                animate();
+
+                function init() {
+
+                    container = document.createElement('div');
+                    document.body.appendChild(container);
+
+                    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+                    camera.position.z = 3;
+
+                    // scene
+                    scene = new THREE.Scene();
+
+                    var ambient = new THREE.AmbientLight(0x444444);
+                    scene.add(ambient);
+
+                    var directionalLight = new THREE.DirectionalLight(0xffeedd);
+                    directionalLight.position.set(0, 0, 1).normalize();
+                    scene.add(directionalLight);
+
+                    // model
+                    var onProgress = function(xhr) {~
+                        if (xhr.lengthComputable) {
+                            var percentComplete = xhr.loaded / xhr.total * 100;
+                            var counter = document.getElementById("counter");
+                            counter.innerText = Math.round(percentComplete, 2) + '% downloaded';
+                        }
+                    };
+
+                    var onError = function(xhr) {};
+
+                    var loader = new THREE.OBJLoader();
+                    loader.load( "obj/d.obj", function ( group ) {
+                        geometry = group.children[ 0 ].geometry;
+                        geometry.attributes.uv2 = geometry.attributes.uv;
+                        geometry.center();
+                        mesh = new THREE.Mesh( geometry, materialNormal );
+                        mesh.scale.multiplyScalar( 25 );
+                        scene.add( mesh );
+                    } );
+
+                    //
+
+                    renderer = new THREE.WebGLRenderer();
+                    renderer.setPixelRatio(window.devicePixelRatio);
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    container.appendChild(renderer.domElement);
+
+                    //
+
+                    window.addEventListener('resize', onWindowResize, false);
+
+                }
+
+                function onWindowResize() {
+
+                    windowHalfX = window.innerWidth / 2;
+                    windowHalfY = window.innerHeight / 2;
+
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+
+                }
+
+
+                function animate() {
+
+                    requestAnimationFrame(animate);
+                    render();
+
+                }
+
+                function render() {
+
+
+                    camera.lookAt(scene.position);
+
+                    renderer.render(scene, camera);
+
+                }
+            });
+        </script>
+    </body>
+</html>
