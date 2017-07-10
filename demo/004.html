@@ -15,12 +15,13 @@
         <script type="text/javascript" src="../js/r78/DDSLoader.js"></script>
         <script type="text/javascript" src="../js/r78/OBJLoader.js"></script>
         <script type="text/javascript" src="../js/r78/MTLLoader.js"></script>
+        <script src="../js/r78/OrbitControls.js"></script>
 
         <script type="text/javascript" src="../js/r78/Detector.js"></script>
         <script type="text/javascript" src="../js/r78/stats.min.js"></script>
         <script type="text/javascript">
             $(document).ready(function() {
-                var container, stats;
+                var container, stats, controls;
                 var camera, scene, renderer;
                 var mouseX = 0,
                     mouseY = 0;
@@ -37,6 +38,7 @@
 
                     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
                     camera.position.z = 3;
+                    var controls =  new THREE.OrbitControls(camera);
 
                     // scene
                     scene = new THREE.Scene();

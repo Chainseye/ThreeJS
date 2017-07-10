@@ -12,11 +12,18 @@
         <div id="counter"></div>
         <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
         <script type="text/javascript" src="../js/three.min.js"></script>
+    	<script src="../js/r78/OrbitControls.js"></script>
+
+    	<script src="../js/r78/DragControl.js"></script>
+    	<script src="../js/r78/TransformControls.js"></script>
+        
         <script type="text/javascript" src="../js/r78/OBJLoader.js"></script>
         <script type="text/javascript" src="../js/r78/stats.min.js"></script>
+
+        <script type="text/javascript" src="../js/r78/dat.gui.min.js"></script>
         <script type="text/javascript">
             $(document).ready(function() {
-                var container, stats;
+                var container, stats, controls;
                 var camera, scene, renderer;
                 var mouseX = 0,
                     mouseY = 0;
@@ -34,7 +41,8 @@
 			        container.appendChild( stats.dom );
 
                     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 200000);
-                    camera.position.z = 20000;
+                    camera.position.set(-20000, 0, 20000);
+                    controls = new THREE.OrbitControls( camera );
 
                     // scene
                     scene = new THREE.Scene();
@@ -50,11 +58,23 @@
                     var obj = new THREE.OBJLoader();
                     obj.load("obj/d.obj", function(o) {
                         o.position.y = 0;
-                        o.rotation.x = -0.0;
-                        o.rotation.y = 0.0;
-                        o.rotation.z = 2.42;
                         scene.add(o);
+                	
                     })
+
+                    //
+
+                    var helper = new THREE.GridHelper( 20000, 50 );
+                    helper.position.y = - 199;
+                    helper.material.opacity = 0.25;
+                    helper.material.transparent = true;
+                    scene.add( helper );
+
+                    var axis = new THREE.AxisHelper();
+                    axis.position.set( -500, -500, -500 );
+                    scene.add( axis );
+
+                    
 
 
                     //
