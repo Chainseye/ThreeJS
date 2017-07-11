@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>  
+    <head>  
+        <meta charset="utf-8">  
+            <title>Simple Editor</title>  
+            <script type="text/javascript" src="../js/three.min.js"></script>
+            <script type="text/javascript" src="../js/r78/OBJLoader.js"></script>  
+            <script type="text/javascript" src="../js/r78/MTLLoader.js"></script>  
+            <script src="../js/r78/DragControls.js"></script>
+       		<script src="../js/r78/TrackballControls.js"></script>
+
+            <!--<script type="text/javascript" src="../js/r78/OBJMTLLoader.js"></script>-->
+            <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+            <script type="text/javascript" src="../js/r78/stats.min.js"></script>  
+            <script type="text/javascript" src="../js/r78/dat.gui.min.js"></script>  
+            <script type="text/javascript" src="../js/r78/Detector.js"></script>  
+            <!--<script type="text/javascript" src="../js/r78/OrbitControls.js"></script>-->  
+            <style>  
+                    body {  
+                        background:#000;  
+                        color:#000;  
+                        padding:0;  
+                        margin:0;  
+                        overflow:hidden;  
+                        font-family:monospace;  
+                        font-size:13px;  
+                        text-align:center;  
+                    }  
+        
+                    a { color:skyblue }  
+        
+                    #info {  
+                        position: absolute;  
+                        top: 0px; width: 100%;  
+                        color: #fff;  
+                        background:rgba(0,0,0,0.65);  
+                        padding: 5px;  
+                        text-align: center;  
+                        z-index:100;  
+                        display:block;  
+                    }  
+        
+                    #stats { position: absolute; top:5px; left: 0; z-index: 100 }  
+                    #stats #fps { background: transparent !important }  
+                    #stats #fps #fpsText { color: #aaa !important }  
+                    #stats #fps #fpsGraph { display: none }  
+            </style>  
+        </head>  
+        <body>  
+        
+        <div id="Stats-output">  
+        </div>  
+        <!-- Div which will hold the Output -->  
+        <div id="WebGL-output">  
+        </div>  
+        
+        <script type="text/javascript">  
+        
+            $(function () {  
+        
+                var stats = initStats();  
+        
+                // create a scene, that will hold all our elements such as objects, cameras and lights.  
+                var scene = new THREE.Scene();  
+                
+                
+                // create a camera, which defines where we're looking at.  
+                var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);  
+
+                var _objs = [];
+
+                var _controls;
+
+                // add model controls
+				_controls = new THREE.TrackballControls( camera );
+				_controls.rotateSpeed = 1.0;
+				_controls.zoomSpeed = 1.2;
+				_controls.panSpeed = 0.8;
+				_controls.noZoom = false;
+				_controls.noPan = false;
+				_controls.staticMoving = true;
+				_controls.dynamicDampingFactor = 0.3;
+        
+                // create a render and set the size  
+                var renderer = new THREE.WebGLRenderer({
+                    antialias: true
+                });  
+                renderer.setClearColor(0xffffff);  
+                renderer.setSize(window.innerWidth, window.innerHeight);  
+                renderer.shadowMapEnabled = true;
+   				renderer.sortObjects = false;
+                
+                //添加坐标轴  
+                var axes = new THREE.AxisHelper( 5 );  
+                scene.add(axes);  
+                
+        
+                // 创建一个平面  
+                var planeGeometry = new THREE.PlaneGeometry(100,100, 1, 1);  
+                var planeMaterial = new THREE.MeshLambertMaterial({color: 0x3e99ff});  
+                var plane = new THREE.Mesh(planeGeometry, planeMaterial);  
+                plane.receiveShadow = true;  
+        
+                // rotate and position the plane  
+                plane.rotation.x = -0.5 * Math.PI;  
+                plane.position.x = 15  
+                plane.position.y = -20  
+                plane.position.z = 0  
+                scene.add(plane);  
+                
+                
+                //添加模型  
+                // model
+                var onProgress = function(xhr) {
+                    if (xhr.lengthComputable) {
+                        console.log(percentComplete = xhr.loaded / xhr.total * 100);
+                    }
+                };
+
+                var onError = function(xhr) {};
+                var gui = new dat.GUI();  
+                var mesh;  
+                var mtlLoader = new THREE.MTLLoader();
+                mtlLoader.setPath('obj/');
+                mtlLoader.load('egg.mtl', function(materials) {
+
+                    materials.preload();
+
+                    var objLoader = new THREE.OBJLoader();
+                    objLoader.setMaterials(materials);
+                    objLoader.setPath('obj/');
+                    objLoader.load('egg.obj', function(object) {
+
+                        object.position.y = -0.5;
+                        object.children[0].castShadow = true;
+					    object.children[0].receiveShadow = true;
+                        scene.add(object);
+                        _objs.push(object.children[0]);
+                        
+                        console.log(_objs);
+                        console.table(_objs);
+                    }, onProgress, onError);
+                });
+
+                var geometry = new THREE.BoxGeometry( 10, 10, 10 );
+
+				for ( var i = 0; i < 3; i ++ ) {
+
+					var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+
+					object.position.x = Math.random() * 100 - 50;
+					object.position.y = Math.random() * 60 - 30;
+					object.position.z = Math.random() * 80 - 40;
+
+					object.rotation.x = Math.random() * 2 * Math.PI;
+					object.rotation.y = Math.random() * 2 * Math.PI;
+					object.rotation.z = Math.random() * 2 * Math.PI;
+
+					object.scale.x = Math.random() * 2 + 1;
+					object.scale.y = Math.random() * 2 + 1;
+					object.scale.z = Math.random() * 2 + 1;
+
+					object.castShadow = true;
+					object.receiveShadow = true;
+
+					scene.add( object );
+
+                    _objs.push( object );
+                    console.log(_objs);
+                    console.table(_objs);
+				}
+
+                var dragControls = new THREE.DragControls(_objs, camera, renderer.domElement );
+				dragControls.addEventListener( 'dragstart', function ( event ) { controls.enabled = false; } );
+				dragControls.addEventListener( 'dragend', function ( event ) { controls.enabled = true; } );
+
+                // 相机在场景中的位置和指向  
+                camera.position.x = -25;  
+                camera.position.y = 40;  
+                camera.position.z = 25;  
+                camera.lookAt(new THREE.Vector3(10, 0, 0));  
+                
+                //添加控制  
+                /*
+                var orbitControls = new THREE.OrbitControls(camera);  
+                orbitControls.autoRotate = true;//设置平面自动旋转  
+                var clock = new THREE.Clock();  
+                */
+                
+                // 增加外界环境光照  
+                var ambiColor = "#8b8a87";  
+                var ambientLight = new THREE.AmbientLight(ambiColor);  
+                scene.add(ambientLight);  
+        
+                // 为了增加阴影添加一个点光源  
+                var spotLight = new THREE.SpotLight(0xffffff);  
+                spotLight.position.set(-40, 60, -10);  
+                spotLight.castShadow = true;  
+                scene.add(spotLight);  
+        
+                // add the output of the renderer to the html element  
+                $("#WebGL-output").append(renderer.domElement);  
+        
+        
+                // call the render function  
+                var step = 0;  
+        
+                var controls = new function () {  
+                    this.rotationSpeed = 0.01;  
+                    this.bouncingSpeed = 0;  
+                    this.ambientColor = ambiColor;  
+                }  
+        
+                var gui = new dat.GUI();  
+                gui.addColor(controls, 'ambientColor').onChange(function (e) {  
+                    ambientLight.color = new THREE.Color(e);  
+                }); 
+
+                animate();  
+                
+                //监听窗口时间使其自适应  
+                window.addEventListener( 'resize', onWindowResize, false );  
+                
+                function animate() {
+                    requestAnimationFrame(animate);
+                    render();
+                    stats.update();
+                }
+
+                function render() {  
+                    _controls.update();
+
+                    //sphere.rotation.y=step+=0.01;  
+                    /*
+                    var delta = clock.getDelta();  
+                    orbitControls.update(delta);  
+                    if (mesh) {  
+                        //      mesh.rotation.y+=0.006;  
+                        mesh.rotation.y+=0.006;//只是水平旋转  
+                        //mesh.rotation.x += controls.rotationSpeed;  
+                        //mesh.rotation.y += controls.rotationSpeed;  
+                        //mesh.rotation.z += controls.rotationSpeed;  
+                    } 
+                    */ 
+                    // render using requestAnimationFrame  
+                    renderer.render(scene, camera);  
+                }  
+                
+                function initStats() {  
+                    var stats = new Stats();  
+                    stats.setMode(0); // 0: fps, 1: ms  
+                    // Align top-left  
+                    stats.domElement.style.position = 'absolute';  
+                    stats.domElement.style.left = '0px';  
+                    stats.domElement.style.top = '0px';  
+                    $("#Stats-output").append(stats.domElement);  
+                    return stats;  
+                }  
+                
+                
+                //窗口监听事件  
+                function onWindowResize( event ) {  
+                    SCREEN_WIDTH = window.innerWidth;  
+                    SCREEN_HEIGHT = window.innerHeight;  
+                    renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );  
+                    camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;  
+                    camera.updateProjectionMatrix();  
+                    cameraCube.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;  
+                    cameraCube.updateProjectionMatrix();  
+        
+                }  
+            });  
+        
+        
+        </script>  
+    </body>  
+</html>  
