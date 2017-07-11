@@ -152,9 +152,9 @@
 					    object.children[0].receiveShadow = true;
                         scene.add(object);
 
-                        _transforms.attach(object.children[0]);
+                        //_transforms.attach(object.children[0]);
 
-                        scene.add(_transforms);
+                        //scene.add(_transforms);
                         //_objs.push(object.children[0]);
                         
                     }, onProgress, onError);
@@ -181,9 +181,9 @@
 					object.castShadow = true;
 					object.receiveShadow = true;
 
-                    //_transforms.attach(object);
+                    _transforms.attach(object);
 					scene.add( object );
-
+                    scene.add(_transforms);
                     //_objs.push( object );
 
 				}
