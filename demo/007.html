@@ -6,15 +6,16 @@
             <script type="text/javascript" src="../js/three.min.js"></script>
             <script type="text/javascript" src="../js/r78/OBJLoader.js"></script>  
             <script type="text/javascript" src="../js/r78/MTLLoader.js"></script>  
-            <script src="../js/r78/DragControls.js"></script>
+            <!--<script src="../js/r78/DragControls.js"></script>-->
        		<script src="../js/r78/TrackballControls.js"></script>
 
-            <!--<script type="text/javascript" src="../js/r78/OBJMTLLoader.js"></script>-->
             <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
             <script type="text/javascript" src="../js/r78/stats.min.js"></script>  
             <script type="text/javascript" src="../js/r78/dat.gui.min.js"></script>  
             <script type="text/javascript" src="../js/r78/Detector.js"></script>  
-            <!--<script type="text/javascript" src="../js/r78/OrbitControls.js"></script>-->  
+            <script type="text/javascript" src="../js/r78/OrbitControls.js"></script>  
+            <script type="text/javascript" src="../js/r78/TransformControls.js"></script>  
+            
             <style>  
                     body {  
                         background:#000;  
@@ -69,9 +70,10 @@
 
                 var _objs = [];
 
-                var _controls;
+                var _controls, _transforms, renderer, orbit;
 
                 // add model controls
+                /*
 				_controls = new THREE.TrackballControls( camera );
 				_controls.rotateSpeed = 1.0;
 				_controls.zoomSpeed = 1.2;
@@ -80,9 +82,13 @@
 				_controls.noPan = false;
 				_controls.staticMoving = true;
 				_controls.dynamicDampingFactor = 0.3;
-        
+                */
+
+                orbit = new THREE.OrbitControls( camera );
+
+
                 // create a render and set the size  
-                var renderer = new THREE.WebGLRenderer({
+                renderer = new THREE.WebGLRenderer({
                     antialias: true
                 });  
                 renderer.setClearColor(0xffffff);  
@@ -90,16 +96,26 @@
                 renderer.shadowMapEnabled = true;
    				renderer.sortObjects = false;
                 
+                // add transform control
+                _transforms = new THREE.TransformControls( camera, renderer.domElement);
+                _transforms,addEventListener("change", render);
+
                 //添加坐标轴  
                 var axes = new THREE.AxisHelper( 5 );  
                 scene.add(axes);  
-                
+
+                var helper = new THREE.GridHelper( 100, 50 );
+                helper.position.y = 0;
+                helper.material.opacity = 0.25;
+                helper.material.transparent = true;
+                scene.add( helper );        
         
                 // 创建一个平面  
                 var planeGeometry = new THREE.PlaneGeometry(100,100, 1, 1);  
                 var planeMaterial = new THREE.MeshLambertMaterial({color: 0x3e99ff});  
                 var plane = new THREE.Mesh(planeGeometry, planeMaterial);  
-                plane.receiveShadow = true;  
+                plane.receiveShadow = true;
+                _objs.push(plane);  
         
                 // rotate and position the plane  
                 plane.rotation.x = -0.5 * Math.PI;  
@@ -135,10 +151,12 @@
                         object.children[0].castShadow = true;
 					    object.children[0].receiveShadow = true;
                         scene.add(object);
-                        _objs.push(object.children[0]);
+
+                        _transforms.attach(object.children[0]);
+
+                        scene.add(_transforms);
+                        //_objs.push(object.children[0]);
                         
-                        console.log(_objs);
-                        console.table(_objs);
                     }, onProgress, onError);
                 });
 
@@ -163,16 +181,18 @@
 					object.castShadow = true;
 					object.receiveShadow = true;
 
+                    //_transforms.attach(object);
 					scene.add( object );
 
-                    _objs.push( object );
-                    console.log(_objs);
-                    console.table(_objs);
+                    //_objs.push( object );
+
 				}
 
+                /*
                 var dragControls = new THREE.DragControls(_objs, camera, renderer.domElement );
 				dragControls.addEventListener( 'dragstart', function ( event ) { controls.enabled = false; } );
 				dragControls.addEventListener( 'dragend', function ( event ) { controls.enabled = true; } );
+                */
 
                 // 相机在场景中的位置和指向  
                 camera.position.x = -25;  
@@ -180,12 +200,58 @@
                 camera.position.z = 25;  
                 camera.lookAt(new THREE.Vector3(10, 0, 0));  
                 
-                //添加控制  
-                /*
-                var orbitControls = new THREE.OrbitControls(camera);  
-                orbitControls.autoRotate = true;//设置平面自动旋转  
-                var clock = new THREE.Clock();  
-                */
+                window.addEventListener( 'keydown', function ( event ) {
+
+					switch ( event.keyCode ) {
+
+						case 81: // Q
+							_transforms.setSpace( _transforms.space === "local" ? "world" : "local" );
+							break;
+
+						case 17: // Ctrl
+							_transforms.setTranslationSnap( 100 );
+							_transforms.setRotationSnap( THREE.Math.degToRad( 15 ) );
+							break;
+
+						case 87: // W
+							_transforms.setMode( "translate" );
+							break;
+
+						case 69: // E
+							_transforms.setMode( "rotate" );
+							break;
+
+						case 82: // R
+							_transforms.setMode( "scale" );
+							break;
+
+						case 187:
+						case 107: // +, =, num+
+							_transforms.setSize( _transforms.size + 0.1 );
+							break;
+
+						case 189:
+						case 109: // -, _, num-
+							_transforms.setSize( Math.max( _transforms.size - 0.1, 0.1 ) );
+							break;
+
+					}
+
+				});
+
+                window.addEventListener( 'keyup', function ( event ) {
+
+					switch ( event.keyCode ) {
+
+						case 17: // Ctrl
+							_transforms.setTranslationSnap( null );
+							_transforms.setRotationSnap( null );
+							break;
+
+					}
+
+				});
+
                 
                 // 增加外界环境光照  
                 var ambiColor = "#8b8a87";  
@@ -204,6 +270,7 @@
         
                 // call the render function  
                 var step = 0;  
+        
         
                 var controls = new function () {  
                     this.rotationSpeed = 0.01;  
@@ -228,7 +295,7 @@
                 }
 
                 function render() {  
-                    _controls.update();
+                    //_controls.update();
 
                     //sphere.rotation.y=step+=0.01;  
                     /*
@@ -243,6 +310,7 @@
                     } 
                     */ 
                     // render using requestAnimationFrame  
+                    _transforms.update();
                     renderer.render(scene, camera);  
                 }  
                 
