@@ -7,12 +7,12 @@
             <script type="text/javascript" src="../js/r78/OBJLoader.js"></script>  
             <script type="text/javascript" src="../js/r78/MTLLoader.js"></script>  
             <!--<script src="../js/r78/DragControls.js"></script>-->
-       		<script src="../js/r78/TrackballControls.js"></script>
+       		<!--<script src="../js/r78/TrackballControls.js"></script>-->
 
+            <script type="text/javascript" src="../js/r78/stats.min.js"></script>
             <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
-            <script type="text/javascript" src="../js/r78/stats.min.js"></script>  
-            <script type="text/javascript" src="../js/r78/dat.gui.min.js"></script>  
-            <script type="text/javascript" src="../js/r78/Detector.js"></script>  
+            <!--<script type="text/javascript" src="../js/r78/dat.gui.min.js"></script>-->  
+            <!--<script type="text/javascript" src="../js/r78/Detector.js"></script>-->    
             <script type="text/javascript" src="../js/r78/OrbitControls.js"></script>  
             <script type="text/javascript" src="../js/r78/TransformControls.js"></script>  
             
@@ -72,18 +72,6 @@
 
                 var _controls, _transforms, renderer, orbit, raycaster, mouse;
 
-                // add model controls
-                
-				_controls = new THREE.TrackballControls( camera );
-				_controls.rotateSpeed = 1.0;
-				_controls.zoomSpeed = 1.2;
-				_controls.panSpeed = 0.8;
-				_controls.noZoom = false;
-				_controls.noPan = false;
-				_controls.staticMoving = true;
-				_controls.dynamicDampingFactor = 0.3;
-            
-
                 orbit = new THREE.OrbitControls( camera );
 
 
@@ -133,12 +121,11 @@
                 };
 
                 var onError = function(xhr) {};
-                var gui = new dat.GUI();  
                 var mesh;  
                 var mtlLoader = new THREE.MTLLoader();
                 mtlLoader.setPath('obj/');
                 mtlLoader.load('egg.mtl', function(materials) {
-
+                
                     materials.preload();
 
                     var objLoader = new THREE.OBJLoader();
@@ -151,9 +138,6 @@
 					    object.children[0].receiveShadow = true;
                         scene.add(object);
 
-                        //_transforms.attach(object.children[0]);
-
-                        //scene.add(_transforms);
                         _objs.push(object.children[0]);
                         
                     }, onProgress, onError);
@@ -268,11 +252,6 @@
                     this.ambientColor = ambiColor;  
                 }  
         
-                var gui = new dat.GUI();  
-                gui.addColor(controls, 'ambientColor').onChange(function (e) {  
-                    ambientLight.color = new THREE.Color(e);  
-                }); 
-
                 animate();  
                 
                 //监听窗口时间使其自适应  
@@ -286,8 +265,8 @@
                     var _mouse = new THREE.Vector2();
                     var rect = renderer.domElement.getBoundingClientRect();
 
-                    _mouse.x = ( (event.clientX - rect.left) / rect.width ) * 2 - 1;
-                    _mouse.y = - ( (event.clientY - rect.top) / rect.height ) * 2 + 1;                    
+                    _mouse.x = ( (e.clientX - rect.left) / rect.width ) * 2 - 1;
+                    _mouse.y = - ( (e.clientY - rect.top) / rect.height ) * 2 + 1;                    
                     raycaster = new THREE.Raycaster();
                     raycaster.setFromCamera(_mouse, camera);
   		            
@@ -307,39 +286,7 @@
                     stats.update();
                 }
 
-                /*
-                var vector = new THREE.Vector3( mouse.X, mouse.Y, 1).unproject( camera );
-                raycaster.set( camera.position, vector.sub( camera.position ).normalize());
-                var intersects = raycaster.intersectObjects( parentTransform.children, true);
-                
-                if( intersects.length > 0 ) {
-                    if( currentIntersected !== undefined ) {
-                        currentIntersected.material.linewidth = 1;
-                    }                
-                    currentIntersected = intersects[ 0 ].object;
-                    currentIntersected.material.linewidth = 5;
-                    sphereInter.visible = true;
-                    sphereInter.position.copy( intersects[ 0 ].point );
-                }
-                */
-
                 function render() {  
-                    _controls.update();
-
-                    //sphere.rotation.y=step+=0.01;  
-                    /*
-                    var delta = clock.getDelta();  
-                    orbitControls.update(delta);  
-                    if (mesh) {  
-                        //      mesh.rotation.y+=0.006;  
-                        mesh.rotation.y+=0.006;//只是水平旋转  
-                        //mesh.rotation.x += controls.rotationSpeed;  
-                        //mesh.rotation.y += controls.rotationSpeed;  
-                        //mesh.rotation.z += controls.rotationSpeed;  
-                    } 
-                    */ 
-                    // render using requestAnimationFrame  
-                    //_transforms.update();
                     renderer.render(scene, camera);  
                 }  
 

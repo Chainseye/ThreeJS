@@ -51,9 +51,9 @@
 
                     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 200000);
                     camera.position.set(-20000, 0, 20000);
-                    controls = new THREE.OrbitControls( camera, obj );
+                    controls = new THREE.OrbitControls( camera );
                 
-                    _controls = new THREE.OrbitControls( camera, _obj );
+                    _controls = new THREE.OrbitControls( camera );
 
 
                     var ambient = new THREE.AmbientLight(0x444444);
