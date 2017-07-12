@@ -70,10 +70,10 @@
 
                 var _objs = [];
 
-                var _controls, _transforms, renderer, orbit;
+                var _controls, _transforms, renderer, orbit, raycaster, mouse;
 
                 // add model controls
-                /*
+                
 				_controls = new THREE.TrackballControls( camera );
 				_controls.rotateSpeed = 1.0;
 				_controls.zoomSpeed = 1.2;
@@ -82,7 +82,7 @@
 				_controls.noPan = false;
 				_controls.staticMoving = true;
 				_controls.dynamicDampingFactor = 0.3;
-                */
+            
 
                 orbit = new THREE.OrbitControls( camera );
 
@@ -98,7 +98,6 @@
                 
                 // add transform control
                 _transforms = new THREE.TransformControls( camera, renderer.domElement);
-                _transforms,addEventListener("change", render);
 
                 //添加坐标轴  
                 var axes = new THREE.AxisHelper( 5 );  
@@ -155,7 +154,7 @@
                         //_transforms.attach(object.children[0]);
 
                         //scene.add(_transforms);
-                        //_objs.push(object.children[0]);
+                        _objs.push(object.children[0]);
                         
                     }, onProgress, onError);
                 });
@@ -181,18 +180,12 @@
 					object.castShadow = true;
 					object.receiveShadow = true;
 
-                    _transforms.attach(object);
+                    //_transforms.attach(object);
 					scene.add( object );
-                    scene.add(_transforms);
-                    //_objs.push( object );
+                    //scene.add(_transforms);
+                    _objs.push( object );
 
 				}
-
-                /*
-                var dragControls = new THREE.DragControls(_objs, camera, renderer.domElement );
-				dragControls.addEventListener( 'dragstart', function ( event ) { controls.enabled = false; } );
-				dragControls.addEventListener( 'dragend', function ( event ) { controls.enabled = true; } );
-                */
 
                 // 相机在场景中的位置和指向  
                 camera.position.x = -25;  
@@ -247,7 +240,6 @@
 							_transforms.setTranslationSnap( null );
 							_transforms.setRotationSnap( null );
 							break;
-
 					}
 
 				});
@@ -265,12 +257,10 @@
                 scene.add(spotLight);  
         
                 // add the output of the renderer to the html element  
-                $("#WebGL-output").append(renderer.domElement);  
-        
+                $("#WebGL-output").append(renderer.domElement);        
         
                 // call the render function  
-                var step = 0;  
-        
+                var step = 0;      
         
                 var controls = new function () {  
                     this.rotationSpeed = 0.01;  
@@ -288,14 +278,53 @@
                 //监听窗口时间使其自适应  
                 window.addEventListener( 'resize', onWindowResize, false );  
                 
+                document.addEventListener("mousedown", onMouseMove, false);
+                
+                function onMouseMove(e) {
+                    e.preventDefault;
+                    //var vector = new THREE.Vector3( mouse.X, mouse.Y, 1).unproject( camera );
+                    var _mouse = new THREE.Vector2();
+                    var rect = renderer.domElement.getBoundingClientRect();
+
+                    _mouse.x = ( (event.clientX - rect.left) / rect.width ) * 2 - 1;
+                    _mouse.y = - ( (event.clientY - rect.top) / rect.height ) * 2 + 1;                    
+                    raycaster = new THREE.Raycaster();
+                    raycaster.setFromCamera(_mouse, camera);
+  		            
+                    var intersects = raycaster.intersectObjects( _objs );
+                    if ( intersects.length > 0 ) {
+
+                        _transforms.attach(intersects[0].object);
+                        scene.add(_transforms);
+
+                    }
+                }
+
+
                 function animate() {
                     requestAnimationFrame(animate);
                     render();
                     stats.update();
                 }
 
+                /*
+                var vector = new THREE.Vector3( mouse.X, mouse.Y, 1).unproject( camera );
+                raycaster.set( camera.position, vector.sub( camera.position ).normalize());
+                var intersects = raycaster.intersectObjects( parentTransform.children, true);
+                
+                if( intersects.length > 0 ) {
+                    if( currentIntersected !== undefined ) {
+                        currentIntersected.material.linewidth = 1;
+                    }                
+                    currentIntersected = intersects[ 0 ].object;
+                    currentIntersected.material.linewidth = 5;
+                    sphereInter.visible = true;
+                    sphereInter.position.copy( intersects[ 0 ].point );
+                }
+                */
+
                 function render() {  
-                    //_controls.update();
+                    _controls.update();
 
                     //sphere.rotation.y=step+=0.01;  
                     /*
@@ -310,12 +339,12 @@
                     } 
                     */ 
                     // render using requestAnimationFrame  
-                    _transforms.update();
+                    //_transforms.update();
                     renderer.render(scene, camera);  
                 }  
-                
+
                 function initStats() {  
-                    var stats = new Stats();  
+                    var stats = new Stats();
                     stats.setMode(0); // 0: fps, 1: ms  
                     // Align top-left  
                     stats.domElement.style.position = 'absolute';  
