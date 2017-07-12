@@ -11,6 +11,7 @@
 
             <script type="text/javascript" src="../js/r78/stats.min.js"></script>
             <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+            <script type="text/javascript" src="../js/jquery.cookie.js"></script>
             <!--<script type="text/javascript" src="../js/r78/dat.gui.min.js"></script>-->  
             <!--<script type="text/javascript" src="../js/r78/Detector.js"></script>-->    
             <script type="text/javascript" src="../js/r78/OrbitControls.js"></script>  
@@ -45,6 +46,19 @@
                     #stats #fps { background: transparent !important }  
                     #stats #fps #fpsText { color: #aaa !important }  
                     #stats #fps #fpsGraph { display: none }  
+
+                    #save {
+                        position: absolute;
+                        top: 5px;
+                        left: 50%;
+                        width: 100px;
+                        height: 40px;
+                        line-height: 40px;
+                        font-size: 32px;
+                        color: #f00;
+                        background: #fff;
+                        z-index: 200;
+                    }
             </style>  
         </head>  
         <body>  
@@ -54,6 +68,8 @@
         <!-- Div which will hold the Output -->  
         <div id="WebGL-output">  
         </div>  
+
+        <button id="save">Save</button>
         
         <script type="text/javascript">  
         
@@ -70,7 +86,7 @@
 
                 var _objs = [];
 
-                var _controls, _transforms, renderer, orbit, raycaster, mouse;
+                var _controls, _transforms, renderer, orbit, raycaster, mouse, _data;
 
                 orbit = new THREE.OrbitControls( camera );
 
@@ -145,6 +161,7 @@
 
                 var geometry = new THREE.BoxGeometry( 10, 10, 10 );
 
+                console.log(_data);
 				for ( var i = 0; i < 3; i ++ ) {
 
 					var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
@@ -228,6 +245,12 @@
 
 				});
 
+                var save = document.getElementById("save");
+                save.addEventListener("click", function() {
+                    console.table(_objs);
+                    $.cookie("save", _objs);
+                }, false);
+
                 
                 // 增加外界环境光照  
                 var ambiColor = "#8b8a87";  
@@ -292,6 +315,7 @@
 
                 function initStats() {  
                     var stats = new Stats();
+                    _data = $.cookie("save");
                     stats.setMode(0); // 0: fps, 1: ms  
                     // Align top-left  
                     stats.domElement.style.position = 'absolute';  
