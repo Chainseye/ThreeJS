@@ -161,7 +161,6 @@
 
                 var geometry = new THREE.BoxGeometry( 10, 10, 10 );
 
-                console.log(_data);
 				for ( var i = 0; i < 3; i ++ ) {
 
 					var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
@@ -248,7 +247,7 @@
                 var save = document.getElementById("save");
                 save.addEventListener("click", function() {
                     console.table(_objs);
-                    $.cookie("save", _objs);
+                    $.cookie('save', _objs);
                 }, false);
 
                 
