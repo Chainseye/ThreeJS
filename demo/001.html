@@ -12,6 +12,8 @@
         <div class="container"></div>
         <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
         <script type="text/javascript" src="../js/three.min.js"></script>
+        <!--视角控制-->
+    	<script src="../js/r78/OrbitControls.js"></script>
         <script>
             /**
             *   最基础的4个步骤：
@@ -28,9 +30,11 @@
             //      不是俯视仰视，是视野上下角度，180°倍数场景里没有渲染物品    ||             此范围之外的物体不会被渲染
             //                                        ||                   ||                  ||         ||
             //                                        Ｖ                   Ｖ　　　　　　　　　　Ｖ　　　　　Ｖ
-            //                                      75°视角          相机拍摄面的长宽比       近裁剪面  远裁剪面
+            //                                      90°视角          相机拍摄面的长宽比       近裁剪面  远裁剪面
             var camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 1000 );
             var renderer = new THREE.WebGLRenderer();
+
+            var controls = new THREE.OrbitControls( camera );
 
             renderer.setSize( window.innerWidth, window.innerHeight );
             document.body.appendChild( renderer.domElement );
@@ -51,7 +55,17 @@
                 // ambient：表示对环境光的反射能力，只有当设置了AmbientLight后，该值才是有效的，材质对环境光的反射能力与环境光强相乘后得到材质实际表现的颜色
                 // emissive：是材质的自发光颜色，可以用来表现光源的颜色，并不是一种光源，而是一种不受光照影响的颜色
             });
+
+            // 坐标系 X正方向右方 Y正方向上方 Z正方向后方
+            geometry.vertices[0].x += 0.5;
+            geometry.vertices[0].y += 0.5;
+            geometry.vertices[1].z -= 0.5;
+            geometry.vertices[2].z += 0.5;
+            geometry.vertices[3].x += 0.5;
+            geometry.vertices[3].y -= 0.5;
+
             var cube = new THREE.Mesh( geometry, material );
+            cube.rotation.y -= (44.41 / Math.PI)
             scene.add( cube );
 
             //默认情况下，当我们调用 scene.add() 时，对象将被添加到原点处，即坐标点(0,0,0)，这将导致相机和立方体发生空间重叠。为了避免这样，我们把相机（camera）的位置移出来一些。
@@ -60,8 +74,8 @@
             var render = function () {
                 requestAnimationFrame( render );
 
-                cube.rotation.x += 0.01;
-                cube.rotation.y += 0.03;
+                //cube.rotation.x += 0.01;
+                //cube.rotation.y += 0.03;
 
                 renderer.render(scene, camera);
             };
