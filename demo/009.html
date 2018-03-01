@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            position: relative;
+            background: #ffdadd;
+            color:#CCCCCC;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 111;
+        }
+    </style>
+</head>
+<body>
+    <img src="https://www.baidu.com/img/bd_logo1.png">
+    <video id="video" src="aaa.mp4" loop autoplay style="display: none;"></video>
+    <video id="test"></video>
+    <canvas id="origin"></canvas>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <script src="../js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/three.min.js"></script>
+    <script src="../js/r78/OrbitControls.js"></script>
+<script>
+    $(document).ready(function() {
+        var _video = document.getElementById("video");
+        var _canvas = document.getElementById("canvas");
+        var _origin = document.getElementById("origin");
+        var ctx = _canvas.getContext("2d");
+        var _ctx = _origin.getContext("2d");
+        var vWidth, vHeight;
+        var color = [255, 255, 255];
+
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 1000 );
+        var renderer = new THREE.WebGLRenderer({
+            alpha: true
+        });
+
+        var controls = new THREE.OrbitControls( camera );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+        var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        var material = new THREE.MeshBasicMaterial({
+            color: 0x00ff00,
+            wireframe: true
+        });
+        geometry.vertices[0].x += 0.5;
+        geometry.vertices[0].y += 0.5;
+        geometry.vertices[1].z -= 0.5;
+        geometry.vertices[2].z += 0.5;
+        geometry.vertices[3].x += 0.5;
+        geometry.vertices[3].y -= 0.5;
+        var cube = new THREE.Mesh( geometry, material );
+        cube.rotation.y -= (44.41 / Math.PI);
+        scene.add( cube );
+        camera.position.z = 5;
+
+        var texture = new THREE.CanvasTexture(_canvas);
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.format = THREE.RGBFormat;
+        texture.needsUpdate = true;
+        var geometry = new THREE.PlaneGeometry(_video.videoWidth / 50, _video.videoHeight / 50);
+        var material = new THREE.MeshBasicMaterial({map: texture, overdraw: true, side: THREE.DoubleSide});
+        var mesh = new THREE.Mesh(geometry, material);
+        mesh.type = "video";
+        mesh.video = video;
+        mesh.position.set(0, 0, 0);
+        mesh.rotation.set(0, 0, 0);
+        mesh.scale.set(1, 1, 1);
+        var render = function () {
+            requestAnimationFrame( render );
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.03;
+            renderer.render(scene, camera);
+        };
+        scene.add(mesh);
+        render();
+        _video.addEventListener('play', function() {
+            vWidth = _video.videoWidth;
+            vHeight = _video.videoHeight;
+            _canvas.width = vWidth;
+            _canvas.height = vHeight;
+            _origin.width = vWidth / 2;
+            _origin.height = vHeight;
+            checkStatus();
+        }, false);
+
+        function checkStatus() {
+            if(_video.paused || _video.ended) {
+                return false;
+            }
+            transform(color);
+        }
+        function transform(unTransparentRGB) {
+            ctx.drawImage(_video, 0, 0, vWidth, vHeight);
+            var frame = ctx.getImageData(0, 0, vWidth, vHeight);
+            var l = frame.data.length / 4;
+            for (var i = 0; i < l; i++) {
+                var _y = i % vWidth;
+                if(_y < vWidth / 2) {
+                    var _i = i + vWidth / 2;
+                    if(frame.data[_i * 4] < unTransparentRGB[0] && frame.data[_i * 4 + 1] < unTransparentRGB[1] && frame.data[_i * 4 + 2] < unTransparentRGB[2]) {
+                        frame.data[i * 4 + 3] = 0;
+                    }
+                }
+            }
+            _ctx.putImageData(frame, 0, 0);
+
+            setTimeout(function() {
+                checkStatus();
+            }, 0);
+        }
+    });
+</script>
+</body>
+</html>

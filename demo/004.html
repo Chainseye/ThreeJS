@@ -10,6 +10,7 @@
     </head>
     <body>
         <div id="counter"></div>
+        <p style="display:block;position:absolute;top: 0; left:0;width:100%;height:100%;font-size:200px;z-index:0;color:#f00;">哈哈</p>
         <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
         <script type="text/javascript" src="../js/three.min.js"></script>
         <script type="text/javascript" src="../js/r78/DDSLoader.js"></script>
@@ -28,8 +29,19 @@
                 var windowHalfX = window.innerWidth / 2;
                 var windowHalfY = window.innerHeight / 2;
 
-                init();
-                animate();
+                var video = document.createElement('video');
+                video.crossOrigin = '';
+                video.src = "test.mp4";
+                video.autobuffer = true;
+                video.loop = true;
+                
+                video.onloadedmetadata = function () {
+                    init();
+                    animate();
+                };
+
+
+
 
                 function init() {
 
@@ -42,6 +54,8 @@
 
                     // scene
                     scene = new THREE.Scene();
+                    video.play();
+//                    scene.background = new THREE.VideoTexture(video);
 
                     var ambient = new THREE.AmbientLight(0x444444);
                     scene.add(ambient);
@@ -81,7 +95,10 @@
 
                     //
 
-                    renderer = new THREE.WebGLRenderer();
+                    renderer = new THREE.WebGLRenderer({
+                        alpha:true,
+                        antialias: true
+                    });
                     renderer.setPixelRatio(window.devicePixelRatio);
                     renderer.setSize(window.innerWidth, window.innerHeight);
                     container.appendChild(renderer.domElement);
