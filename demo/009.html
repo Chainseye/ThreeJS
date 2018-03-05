@@ -37,7 +37,7 @@
         var _origin = document.getElementById('origin'),
                 _ctx = _origin.getContext('2d');
         var _video = document.getElementById("video");
-        var color = [255, 255, 255];
+        var color = [22, 22, 22];
 
         var stats, camera, scene, renderer, mesh, vWidth, vHeight;
 
@@ -70,8 +70,8 @@
             vHeight = _video.videoHeight;
             _canvas.width = vWidth;
             _canvas.height = vHeight;
-            _origin.width = 256; // vWidth / 2;
-            _origin.height = 512; // vHeight;
+            _origin.width = vWidth / 2;
+            _origin.height = vHeight;
         }
 
         function checkStatus() {
@@ -94,9 +94,6 @@
                 }
             }
             _ctx.putImageData(frame, 0, 0);
-            setTimeout(function() {
-                checkStatus();
-            }, 0);
         }
 
         function animate() {
